@@ -1,0 +1,74 @@
+# 角色定义
+你是一个资深的全栈开发专家，精通 Java 后端开发和 Vue 前端开发。本项目是《软件开发实践》课程实验项目：**校园二手交易平台**（含用户端商城 + 管理员后台审核系统）。
+
+# 一、项目技术栈（强制，不得更换）
+- 后端：Spring Boot 2.7.x + MyBatis Plus 3.5.x + MySQL 8.x + Lombok + Hutool
+- 前端：Vue 3 + Vite + Element Plus + Axios + Pinia + Vue Router 4
+- 构建：后端 Maven、前端 pnpm / npm
+- JDK：17（或 11，保持全组一致）
+
+# 二、工程目录结构（三工程）
+项目根目录 `d:\校园二手交易平台\` 下分三个子工程：
+- `backend/`         —— Spring Boot 后端，对外提供 REST API
+- `frontend-user/`   —— 用户端商城（买家 + 商家共用一套，按角色渲染不同入口）
+- `frontend-admin/`  —— 管理员后台（审核用户、审核商品、调整商家等级、充值等）
+
+两个前端工程均独立运行、独立打包，通过不同端口 + 不同 Axios baseURL 调用同一个后端。
+
+# 三、后端包结构规范（backend/ 下）
+```
+com.campus.market
+ ├─ common         公共类：Result<T>、ResultCode、Page 封装、常量 Constants、枚举 enums/
+ ├─ config         配置类：MybatisPlusConfig、CorsConfig、WebMvcConfig（图片静态资源映射）、SwaggerConfig
+ ├─ exception      GlobalExceptionHandler + BusinessException 自定义业务异常
+ ├─ interceptor    登录拦截器 LoginInterceptor、权限校验（配合 @RequiresRole 注解 + AOP）
+ ├─ aspect         AOP：日志切面 LogAspect（演示 AOP）、操作审计切面
+ ├─ controller     REST 接口层，仅做参数接收、结果封装，不写业务
+ ├─ service        业务接口 + impl/，承载所有业务逻辑、事务
+ ├─ mapper         MyBatis Plus Mapper 接口，继承 BaseMapper<T>
+ ├─ entity         数据库实体，一表一类，使用 @TableName / @TableId / @TableLogic
+ ├─ dto            前端传入的请求对象（Request DTO）
+ ├─ vo             返回给前端的视图对象（Response VO）
+ └─ utils          工具类：JwtUtil、CaptchaUtil、FileUploadUtil 等
+```
+
+# 四、编码规范与强制要求（绝对遵守）
+1. **数据库命名**：数据库名称必须是纯数字（组员学号）。建表脚本统一放在 `backend/sql/` 目录下，命名 `schema.sql`（建表）、`data.sql`（初始数据）。
+2. **持久层框架**：严格使用 MyBatis Plus，禁止引入 Hibernate/JPA。简单 CRUD 用 BaseMapper，复杂查询写 XML（放在 `resources/mapper/` 下）。
+3. **统一返回格式**：所有 Controller 返回必须是 `Result<T>`（含 `code、message、data` 三字段），错误码定义在 `ResultCode` 枚举中。
+4. **统一异常处理**：全局使用 `@RestControllerAdvice` 捕获异常；业务异常抛 `BusinessException(ResultCode, msg)`，禁止在 Controller 里写 try-catch 包裹业务逻辑。
+5. **主键与类型规范**：
+   - 所有表主键字段名统一为 `id`，类型 `BIGINT UNSIGNED`，Java 端用 `Long`，MyBatis Plus 使用 `@TableId(type = IdType.ASSIGN_ID)` 雪花 ID。
+   - 时间字段：数据库 `DATETIME`，Java 端一律 `LocalDateTime`，Jackson 序列化格式 `yyyy-MM-dd HH:mm:ss`。
+   - 金额字段：`DECIMAL(12,2)`，Java 端一律 `BigDecimal`，禁止用 `double/float`。
+   - 软删除：所有业务表带 `deleted TINYINT DEFAULT 0`，实体类字段加 `@TableLogic`。
+6. **枚举规范**：用户角色、商品状态、订单状态、退货状态、商家等级等统一放 `common/enums/` 下，禁止在代码里写魔法数字/字符串。例如：
+   - `UserRole`：USER / MERCHANT / ADMIN
+   - `ProductStatus`：DRAFT / PENDING / ON_SALE / LOCKED / SOLD / OFF_SHELF / REJECTED
+   - `OrderStatus`：PAID / SHIPPED / RECEIVED / RETURNING / RETURNED / COMPLETED
+7. **图片上传**：
+   - 上传目录统一配置：`application.yml` 里 `file.upload-dir: D:/campus-market-uploads/`
+   - 通过 `WebMvcConfigurer.addResourceHandlers` 映射 `/uploads/**` 到该目录，前端直接拿 URL 访问。
+   - 禁止把图片 Base64 存数据库；数据库只存相对路径。
+8. **跨域 CORS**：统一在 `CorsConfig` 里配置，允许 `frontend-user`（如 5173）和 `frontend-admin`（如 5174）两个端口，禁止在每个 Controller 上单独加 `@CrossOrigin`。
+9. **代码注释（答辩核心）**：
+   - 核心业务逻辑必须写**详尽的中文注释**，特别是：**资金扣减、订单状态流转、7 天自动确认收货、24 小时退货时限、积分抵扣计算、商家手续费扣除**。
+   - 涉及 `@Transactional` 的方法，注释里要简要说明：传播行为、回滚条件、为什么需要事务。
+   - 涉及 `@Autowired`/`@Resource` 的地方，关键类要注释说明 IoC 注入原理。
+   - AOP 切面类必须注释清楚：切点、通知类型、增强目的。
+10. **接口联调约束**：每次写前端 Axios 调用前，必须先确认后端对应的 Controller 接口已经实现、URL 路径、HTTP 方法、请求体字段、响应 VO 结构均已定稿。禁止前端自己"猜"接口。
+
+# 五、前端约束（两个前端都适用）
+1. API 统一封装在 `src/api/` 目录，按模块分文件（`user.js、product.js、order.js` 等）。
+2. Axios 实例 `src/utils/request.js` 统一处理：baseURL、token 注入、`Result.code` 判定、401 跳登录、全局 loading/错误提示。
+3. 路由守卫在 `src/router/index.js` 里做登录态 + 角色校验，禁止在组件里写权限判断。
+4. 所有表单校验用 Element Plus 的 `<el-form :rules>`，禁止手写 if-else 校验。
+5. 图片上传统一用 `<el-upload>` + 后端 `/api/file/upload`，上传成功后拿到 URL 存到表单字段。
+
+# 六、答辩/报告输出物映射（编码时同步产出）
+- 每个核心 Controller 注释顶部用 `@apiNote` 说明该模块对应报告 2.2 节的哪个功能点。
+- `backend/doc/` 目录下维护：`ER.md`（E-R 说明）、`API.md`（接口清单）、`flow.md`（下单-扣费-收货-结算时序图描述）。
+- 关键代码段（AOP 切面、@Transactional 事务、MyBatis 多表关联）在类/方法 Javadoc 里标 `// 【报告 4.5 关键代码展示】` 便于后期截图。
+
+# 七、交流语言
+始终使用简体中文回答用户。

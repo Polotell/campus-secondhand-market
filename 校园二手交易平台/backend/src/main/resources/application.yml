@@ -1,0 +1,80 @@
+server:
+  port: 8080
+  servlet:
+    # 统一 API 前缀，所有 Controller 路径自动带 /api
+    context-path: /api
+
+spring:
+  application:
+    name: campus-market
+  profiles:
+    active: dev
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 50MB
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # ！！数据库名 = 组员学号（纯数字），需用反引号在 SQL 中转义 ！！
+    url: jdbc:mysql://localhost:3306/2023011308?useSSL=false&serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&allowPublicKeyRetrieval=true
+    username: root
+    # 支持环境变量覆盖，避免真实密码入库（生产环境请务必用环境变量）
+    password: ${DB_PASSWORD:20041026Jyhz}
+
+mybatis-plus:
+  mapper-locations: classpath*:mapper/**/*.xml
+  type-aliases-package: com.campus.market.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    # 走 Slf4j，受 logging.level.com.campus.market.mapper 开关控制；
+    # 线上要彻底关 SQL 日志改 level 为 INFO 或用 NoLoggingImpl
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  global-config:
+    banner: false
+    db-config:
+      id-type: ASSIGN_ID
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# 文件上传目录（通过 WebMvcConfig 映射到 /uploads/**）
+file:
+  upload-dir: D:/campus-market-uploads/
+  access-prefix: /uploads/
+
+# JWT 配置
+jwt:
+  # 生产环境必须改成环境变量注入
+  secret: campus-market-secret-key-2023011308-please-change-in-prod-env-xxxxxxxx
+  # token 有效期（小时）
+  expire-hours: 24
+  header: Authorization
+  prefix: "Bearer "
+
+# 业务配置
+campus:
+  points:
+    # 多少积分抵扣 1 元
+    deduction-ratio: 100
+  order:
+    # 发货后多久自动确认收货（小时）
+    auto-confirm-hours: 168   # 7 天
+    # 确认收货后多久内可申请退货（小时）
+    return-deadline-hours: 24
+  # 商家等级 -> 费率映射（百分比）
+  merchant-fee:
+    level-1: 0.0010
+    level-2: 0.0020
+    level-3: 0.0050
+    level-4: 0.0075
+    level-5: 0.0100
+
+logging:
+  level:
+    root: INFO
+    com.campus.market: DEBUG
+    # 只有开发期开这个才会打印每条 SQL；关掉就不打印
+    com.campus.market.mapper: DEBUG
