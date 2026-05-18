@@ -1,0 +1,50 @@
+@startuml campus-market-order-swimlanes
+!theme plain
+title 用户下单 — 扣费 — 确认收货 — 货款结算（业务流程·泳道图）
+
+skinparam ActivityBackgroundColor #FFF9E6
+skinparam ActivityBorderColor #555555
+skinparam ArrowColor #333333
+
+|买家|
+start
+:选择购物车条目并提交下单;
+
+|平台系统|
+:校验库存、余额、同商家、黑名单等;
+:扣减买家钱包余额;
+:货款等额记入 ESCROW 托管;
+:生成订单 PAID，扣减商品库存;
+
+|买家|
+:等待商家发货;
+
+|商家|
+:发货（订单进入 SHIPPED）;
+
+|平台系统|
+:写入发货时间与自动确认截止时间\n（发货后 7 天）;
+
+|买家|
+:（可选）主动确认收货;
+
+|平台系统|
+:若未手动确认：到达截止时间后\n定时任务自动确认收货;
+:订单 RECEIVED，记录退货截止时间\n（确认时刻起 24 小时）;
+
+note right
+  **退货申请**在此窗口内发起；
+  细节见 flow.md 时序图
+end note
+
+:退货窗口届满且无未完成退货流程时\n定时任务触发结算;
+:从 ESCROW 划出：商家应收 + 平台手续费;
+:订单 COMPLETED，向买家发放积分;
+
+note bottom
+  泳道「平台系统」聚合 Spring Boot 后端与 **@Scheduled** 定时任务，
+  与 OrderServiceImpl / PlatformFinanceService 一致。
+end note
+
+|买家|
+stop

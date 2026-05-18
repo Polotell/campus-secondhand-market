@@ -1,6 +1,7 @@
 # 核心业务时序图
 
 > 对应实验报告 **4.6 业务流程图与时序图** 章节。  
+> **泳道图（业务流程·活动图）**见同目录 `uml/order-business-swimlanes.puml`，与本页时序图互补。  
 > 本文与 **`OrderServiceImpl` / `ReturnServiceImpl` / `PlatformFinanceService`** 当前实现一致；HTTP 路径均含全局前缀 `/api`（`server.servlet.context-path`）。
 
 ## 一、完整交易时序图（PlantUML 文法，可直接粘贴到在线渲染工具）

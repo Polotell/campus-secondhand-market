@@ -60,13 +60,10 @@
       <template #header>
         <div class="card-head">
           <el-icon :size="18"><Calendar /></el-icon>
-          <span>下一阶段开发清单</span>
+          <span>待开发功能清单</span>
         </div>
       </template>
       <ol>
-        <li><b>用户审核</b>：待审列表 → 通过 / 驳回（填驳回原因）</li>
-        <li><b>商家审核</b>：查看营业执照 + 身份证 → 通过 / 驳回</li>
-        <li><b>商品审核</b>：商家发布的新商品需审核通过后才能上架</li>
         <li><b>订单监控</b>：托管资金、纠纷处理、退货仲裁</li>
         <li><b>数据统计</b>：交易额、活跃用户、商家等级自动升级</li>
       </ol>

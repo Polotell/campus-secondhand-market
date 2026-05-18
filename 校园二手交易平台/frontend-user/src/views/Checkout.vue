@@ -72,7 +72,8 @@ const pointsUsed = ref(0)
 const cartItemIds = computed(() => {
   const raw = String(route.query.cartItemIds || '')
   if (!raw) return []
-  return raw.split(',').map(v => Number(v)).filter(v => Number.isFinite(v) && v > 0)
+  // 购物车 id 为雪花 Long，不能用 Number()（超过 JS 安全整数会错乱 → 后端报「条目不存在」）
+  return raw.split(',').map((v) => String(v).trim()).filter(Boolean)
 })
 
 const maxPoints = computed(() => preview.value?.pointsUsable || 0)
@@ -120,7 +121,7 @@ async function onSubmit() {
       meetTime: meetTime.value || undefined
     })
     ElMessage.success('下单成功')
-    router.replace({ path: '/orders', query: { highlight: res.id } })
+    router.replace({ path: '/orders', query: { highlight: String(res.id) } })
   } finally {
     creating.value = false
   }

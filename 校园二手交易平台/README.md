@@ -67,17 +67,29 @@
 | 初始数据 SQL | `backend/sql/data.sql` | 4.2.2 |
 | RESTful 接口清单 | `backend/doc/API.md` | 4.3 |
 | 核心业务时序图 | `backend/doc/flow.md` | 4.6 |
+| **UML（PlantUML）** | `uml/order-business-swimlanes.puml`（泳道）、`backend-package-modules.puml`、`order-domain-classes.puml`、`UML.md`、`flow.md`（时序） | 4.6 / 4.x |
 | 模块拆分与工时表 | `backend/doc/modules.md` | 3.1 / 3.4 |
 
 ## 五、快速开始
 
 ### 5.1 初始化数据库
 
-```sql
--- MySQL 8.x 命令行
-mysql -u root -p < backend/sql/schema.sql
-mysql -u root -p 2023011308 < backend/sql/data.sql
+**请务必使用 UTF-8（utf8mb4）客户端导入**，否则中文会变成问号乱码：
+
+```bash
+mysql --default-character-set=utf8mb4 -u root -p < backend/sql/schema.sql
+mysql --default-character-set=utf8mb4 -u root -p 2023011308 < backend/sql/data.sql
 ```
+
+若数据库早已初始化，仅需 **中文分类 + 演示商品**：
+
+```bash
+mysql --default-character-set=utf8mb4 -u root -p 2023011308 < backend/sql/seed-products-demo-cn.sql
+```
+
+若界面/API 仍乱码：先在库里执行 `backend/sql/fix-charset-utf8mb4.sql`，再执行 **`backend/sql/repatch-chinese-data.sql`**（用 CMD：`cmd /c "chcp 65001>nul && mysql --default-character-set=utf8mb4 -u root -p 2023011308 < backend\sql\repatch-chinese-data.sql"`），可修正已变成问号的历史中文。**不要使用 PowerShell 管道导入 UTF-8 中文 SQL**，易被破坏字节。
+
+后端 `application.yml` 里 JDBC 使用 **`characterEncoding=UTF-8`**（与数据库 utf8mb4 并存）；不可用 **`characterEncoding=utf8mb4`**，否则驱动无法识别 Charset。
 
 ### 5.2 启动后端
 

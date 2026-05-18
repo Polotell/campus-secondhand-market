@@ -9,10 +9,10 @@ import javax.validation.constraints.Size;
 public class CarouselSaveDTO {
 
     @NotBlank(message = "图片地址不能为空")
-    @Size(max = 500)
+    @Size(max = 2000)
     private String imageUrl;
 
-    @Size(max = 500)
+    @Size(max = 2000)
     private String linkUrl;
 
     private Integer sort = 0;

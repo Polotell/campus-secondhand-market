@@ -1,6 +1,8 @@
 package com.campus.market.vo;
 
 import com.campus.market.common.enums.OrderStatus;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -13,12 +15,15 @@ import java.util.List;
  */
 @Data
 public class OrderDetailVO implements Serializable {
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
     private String orderNo;
 
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long   merchantId;
     private String shopName;
 
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long   buyerId;
     private String buyerName;
 
@@ -62,7 +67,9 @@ public class OrderDetailVO implements Serializable {
 
     @Data
     public static class OrderItemVO implements Serializable {
+        @JsonSerialize(using = ToStringSerializer.class)
         private Long id;
+        @JsonSerialize(using = ToStringSerializer.class)
         private Long productId;
         private String productName;
         private String productImage;

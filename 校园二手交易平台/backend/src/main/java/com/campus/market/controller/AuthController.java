@@ -41,15 +41,16 @@ public class AuthController {
     private final UserService userService;
 
     @PostMapping("/register/user")
-    public Result<Map<String, Long>> registerUser(@RequestBody @Valid UserRegisterDTO dto) {
+    public Result<Map<String, String>> registerUser(@RequestBody @Valid UserRegisterDTO dto) {
         Long id = authService.registerUser(dto);
-        return Result.success(Map.of("userId", id), "注册成功，请等待管理员审核");
+        // userId 用字符串返给前端，避免雪花 Long 被 JSON 当成 Number 导致 JS 精度丢失
+        return Result.success(Map.of("userId", String.valueOf(id)), "注册成功，请等待管理员审核");
     }
 
     @PostMapping("/register/merchant")
-    public Result<Map<String, Long>> registerMerchant(@RequestBody @Valid MerchantRegisterDTO dto) {
+    public Result<Map<String, String>> registerMerchant(@RequestBody @Valid MerchantRegisterDTO dto) {
         Long id = authService.registerMerchant(dto);
-        return Result.success(Map.of("userId", id), "商家注册成功，请等待管理员审核");
+        return Result.success(Map.of("userId", String.valueOf(id)), "商家注册成功，请等待管理员审核");
     }
 
     @PostMapping("/login")

@@ -95,7 +95,7 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore()
   const isLoggedIn = !!userStore.token
   const isAnon   = to.meta.anon === true
@@ -106,8 +106,24 @@ router.beforeEach((to, from, next) => {
     ? `${to.meta.title} | 校园二手交易平台`
     : '校园二手交易平台'
 
-  // 1. 仅游客：登录后想再访问 /login → 回首页
-  if (isAnon && isLoggedIn) return next('/home')
+  // 1. 仅游客页：如果本地有 token，先校验 token 是否仍有效。
+  //    避免“token 已失效但仍被当作已登录”导致 /login、/register 被错误拦回 /home。
+  if (isAnon && isLoggedIn) {
+    if (!userStore.user) {
+      try {
+        await userStore.refreshMe()
+        return next('/home')
+      } catch {
+        userStore.clearSession()
+        return next()
+      }
+    }
+    return next('/home')
+  }
+
+  // 未登录访问登录/注册页：必须在此放行。
+  // 否则会落入下方「必须登录」分支，反复 next({ path:'/login', query:{ redirect } })，表现为路由卡住。
+  if (isAnon) return next()
 
   // 2. public：任何人放行
   if (isPublic) return next()

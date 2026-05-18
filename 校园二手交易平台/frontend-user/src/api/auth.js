@@ -1,6 +1,6 @@
-import request from '@/utils/request'
+import request from '@/utils/request'// 引入请求工具
 
-export const captcha = () => request.get('/captcha')
+export const captcha = () => request.get('/captcha')// 获取验证码
 
 export const login = (data) => request.post('/auth/login', data)
 

@@ -43,9 +43,9 @@ public class OrderController {
 
     /** 下单（核心事务） */
     @PostMapping
-    public Result<Map<String, Long>> create(@Valid @RequestBody CheckoutDTO dto) {
+    public Result<Map<String, String>> create(@Valid @RequestBody CheckoutDTO dto) {
         Long id = orderService.create(UserContext.getUserId(), dto);
-        return Result.success(Map.of("id", id));
+        return Result.success(Map.of("id", String.valueOf(id)));
     }
 
     /** 我的订单 */
@@ -77,10 +77,10 @@ public class OrderController {
 
     /** 买家：申请退货（必须 RECEIVED 且未超 24h） */
     @PostMapping("/{id}/return-apply")
-    public Result<Map<String, Long>> applyReturn(@PathVariable Long id,
+    public Result<Map<String, String>> applyReturn(@PathVariable Long id,
                                                  @Valid @RequestBody ReturnApplyDTO dto) {
         Long rid = returnService.apply(UserContext.getUserId(), id, dto);
-        return Result.success(Map.of("returnRecordId", rid));
+        return Result.success(Map.of("returnRecordId", String.valueOf(rid)));
     }
 
     /** 买家：订单商品评价（文字 + 五星） */

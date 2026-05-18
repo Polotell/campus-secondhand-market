@@ -124,7 +124,7 @@ const selectedIds = computed(() => {
   const ids = []
   for (const g of view.groups || []) {
     for (const i of g.items || []) {
-      if (i.selected === 1 && i.available) ids.push(i.id)
+      if (i.selected === 1 && i.available) ids.push(String(i.id))
     }
   }
   return ids

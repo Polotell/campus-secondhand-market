@@ -1,0 +1,144 @@
+@startuml campus-market-backend-package-diagram
+!theme plain
+title 后端模块图（UML 包图）\ncom.campus.market — 与 backend/src/main/java 目录一致
+
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam linetype ortho
+left to right direction
+
+' ========== 横切与入口 ==========
+package "com.campus.market.config" as pkg_config << Spring >> {
+  note bottom
+    WebMvc / CORS / MyBatis-Plus /
+    Jackson / DataInitializer
+  end note
+}
+
+package "com.campus.market.interceptor" as pkg_interceptor << Web >> {
+  note bottom
+    LoginInterceptor
+  end note
+}
+
+package "com.campus.market.aspect" as pkg_aspect << AOP >> {
+  note bottom
+    LogAspect / AuthAspect
+  end note
+}
+
+package "com.campus.market.annotation" as pkg_annotation << Java >> {
+  note bottom
+    RequiresRole
+  end note
+}
+
+package "com.campus.market.exception" as pkg_exception << Web >> {
+  note bottom
+    GlobalExceptionHandler
+    BusinessException
+  end note
+}
+
+' ========== 业务分层 ==========
+package "com.campus.market.controller" as pkg_controller << REST >> {
+  note bottom
+    Auth / Cart / Order / Product /
+    Admin / Merchant / File / Home ...
+  end note
+}
+
+package "com.campus.market.service" as pkg_service << API >> {
+  note bottom
+    Service 接口层
+  end note
+}
+
+package "com.campus.market.service.impl" as pkg_impl << Spring >> {
+  note bottom
+    XxxServiceImpl
+  end note
+}
+
+package "com.campus.market.mapper" as pkg_mapper << MyBatis >> {
+  note bottom
+    BaseMapper + XML
+  end note
+}
+
+' ========== 模型 ==========
+package "com.campus.market.entity" as pkg_entity << JPA-like >> {
+  note bottom
+    与表一一映射
+  end note
+}
+
+package "com.campus.market.dto" as pkg_dto << Bound >> {
+  note bottom
+    请求体 / 校验入参
+  end note
+}
+
+package "com.campus.market.vo" as pkg_vo << View >> {
+  note bottom
+    响应视图对象
+  end note
+}
+
+package "com.campus.market.common" as pkg_common << Shared >> {
+  package "com.campus.market.common.enums" as pkg_enums << Enum >> {
+    note bottom
+      OrderStatus / UserRole / ProductStatus ...
+    end note
+  }
+  note bottom of pkg_common
+    Result / PageResult /
+    ResultCode / Constants / UserContext
+  end note
+}
+
+package "com.campus.market.utils" as pkg_utils << Util >> {
+  note bottom
+    JwtUtil / Captcha /
+    OrderNo / FeeRate
+  end note
+}
+
+database "MySQL\n(MyBatis)" as db_mysql
+
+' ---------- 依赖关系（与分层调用方向一致）----------
+pkg_controller ..> pkg_service : 注入接口
+pkg_controller ..> pkg_dto
+pkg_controller ..> pkg_vo
+pkg_controller ..> pkg_common
+
+pkg_impl ..|> pkg_service : implements
+pkg_impl ..> pkg_mapper
+pkg_impl ..> pkg_entity
+pkg_impl ..> pkg_dto
+pkg_impl ..> pkg_utils
+pkg_impl ..> pkg_common
+pkg_impl ..> pkg_enums
+
+pkg_mapper ..> pkg_entity
+
+pkg_mapper -down-> db_mysql
+
+pkg_aspect ..> pkg_annotation
+pkg_aspect ..> pkg_common
+
+pkg_interceptor ..> pkg_utils
+pkg_interceptor ..> pkg_common
+
+pkg_exception ..> pkg_common
+
+pkg_config ..> pkg_interceptor : 注册拦截器等
+
+pkg_entity ..> pkg_enums
+
+note bottom of pkg_controller
+  **物理架构**（浏览器 / 前端工程）见 architecture.md 4.1.1；
+  本图仅描述 **后端 JVM 内包依赖**。
+end note
+
+@enduml

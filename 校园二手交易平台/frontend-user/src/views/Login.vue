@@ -29,8 +29,7 @@
 
         <el-divider style="margin: 18px 0 10px">测试账号</el-divider>
         <div class="tips">
-          <div>管理员：<b>admin / admin123</b>（登录后会跳到用户首页占位；
-            <span style="color:#e6a23c">后台请在 5174 端口登录</span>）</div>
+          <div>管理员：<b>admin / admin123</b>（将自动打开管理后台并同步登录）</div>
           <div>普通用户：<b>student01 / admin123</b></div>
           <div>商 家：<b>merchant01 / admin123</b></div>
         </div>
@@ -49,6 +48,7 @@ import { useUserStore } from '@/stores/user'
 const router = useRouter()
 const route  = useRoute()
 const userStore = useUserStore()
+const ADMIN_ORIGIN = import.meta.env.VITE_ADMIN_ORIGIN || 'http://localhost:5174'
 
 const formRef = ref(null)
 const loading = ref(false)
@@ -65,6 +65,12 @@ async function onSubmit() {
   loading.value = true
   try {
     const res = await userStore.login({ ...form })
+    if (res.user?.role === 'ADMIN') {
+      ElMessage.success('正在跳转到管理后台…')
+      const payload = encodeURIComponent(JSON.stringify({ token: res.token, user: res.user }))
+      window.location.href = `${ADMIN_ORIGIN}/login#handoff=${payload}`
+      return
+    }
     ElMessage.success(`欢迎回来，${res.user.realName || res.user.username}`)
     const redirect = route.query.redirect || '/home'
     router.replace(redirect)

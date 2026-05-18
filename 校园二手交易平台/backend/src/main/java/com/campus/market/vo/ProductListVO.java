@@ -3,6 +3,8 @@ package com.campus.market.vo;
 import com.campus.market.common.enums.ConditionLevel;
 import com.campus.market.common.enums.ProductStatus;
 import com.campus.market.entity.Product;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -15,9 +17,12 @@ import java.time.LocalDateTime;
 @Data
 public class ProductListVO implements Serializable {
 
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long   id;
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long   merchantId;
     private String shopName;
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long   categoryId;
     private String categoryName;
 

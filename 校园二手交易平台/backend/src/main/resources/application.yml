@@ -3,6 +3,10 @@ server:
   servlet:
     # 统一 API 前缀，所有 Controller 路径自动带 /api
     context-path: /api
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
 
 spring:
   application:
@@ -19,7 +23,9 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     # ！！数据库名 = 组员学号（纯数字），需用反引号在 SQL 中转义 ！！
-    url: jdbc:mysql://localhost:3306/2023011308?useSSL=false&serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&allowPublicKeyRetrieval=true
+    # JDBC 必须用 UTF-8（写成 UTF-8），不可用 utf8mb4：后者不是 Java Charset，会导致驱动报错无法建连接。
+    # 数据库仍使用 utf8mb4；可与 connectionCollation 一并约束校对规则。
+    url: jdbc:mysql://localhost:3306/2023011308?useSSL=false&serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=UTF-8&connectionCollation=utf8mb4_unicode_ci&allowPublicKeyRetrieval=true
     username: root
     # 支持环境变量覆盖，避免真实密码入库（生产环境请务必用环境变量）
     password: ${DB_PASSWORD:20041026Jyhz}

@@ -342,8 +342,8 @@ CREATE TABLE `user_blacklist` (
 DROP TABLE IF EXISTS `carousel`;
 CREATE TABLE `carousel` (
   `id`          BIGINT UNSIGNED  NOT NULL,
-  `image_url`   VARCHAR(255)     NOT NULL,
-  `link_url`    VARCHAR(255)     DEFAULT NULL            COMMENT '跳转链接',
+  `image_url`   VARCHAR(2000)    NOT NULL                COMMENT '图片地址（外链可能很长，勿只填搜索引擎详情页）',
+  `link_url`    VARCHAR(2000)    DEFAULT NULL            COMMENT '跳转链接',
   `sort`        INT              NOT NULL DEFAULT 0,
   `status`      VARCHAR(20)      NOT NULL DEFAULT 'ON'   COMMENT 'ON/OFF',
   `created_at`  DATETIME         NOT NULL,

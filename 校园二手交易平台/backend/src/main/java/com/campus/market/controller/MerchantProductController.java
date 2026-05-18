@@ -44,10 +44,10 @@ public class MerchantProductController {
 
     /** 发布新商品（进入 PENDING） */
     @PostMapping
-    public Result<Map<String, Long>> create(@Valid @RequestBody ProductCreateDTO dto) {
+    public Result<Map<String, String>> create(@Valid @RequestBody ProductCreateDTO dto) {
         Long mid = UserContext.getUserId();
         Long id  = productService.create(mid, dto);
-        return Result.success(Collections.singletonMap("id", id));
+        return Result.success(Collections.singletonMap("id", String.valueOf(id)));
     }
 
     /** 下架（ON_SALE → OFF_SHELF） */

@@ -137,7 +137,7 @@ async function load(p) {
 }
 
 async function openEdit(row) {
-  const u = await getAdminUser(row.id)
+  const u = await getAdminUser(String(row.id))
   Object.assign(editForm, {
     id: u.id,
     username: u.username,
@@ -156,7 +156,7 @@ async function openEdit(row) {
 async function saveEdit() {
   saving.value = true
   try {
-    await updateAdminUser(editForm.id, {
+    await updateAdminUser(String(editForm.id), {
       realName: editForm.realName,
       phone: editForm.phone,
       email: editForm.email,
@@ -182,7 +182,7 @@ function openRecharge(row) {
 async function doRecharge() {
   recharging.value = true
   try {
-    await rechargeUser(rechargeRow.value.id, { amount: rechargeForm.amount })
+    await rechargeUser(String(rechargeRow.value.id), { amount: rechargeForm.amount })
     ElMessage.success('充值成功')
     rechargeVisible.value = false
     await load()
@@ -200,7 +200,7 @@ function openLevel(row) {
 async function saveLevel() {
   levelLoading.value = true
   try {
-    await setMerchantLevel(levelRow.value.id, { level: levelVal.value })
+    await setMerchantLevel(String(levelRow.value.id), { level: levelVal.value })
     ElMessage.success('等级已更新')
     levelVisible.value = false
     await load()
@@ -213,7 +213,7 @@ async function onDelete(row) {
   try {
     await ElMessageBox.confirm(`确定删除用户 ${row.username} 吗？（软删除）`, '提示', { type: 'warning' })
   } catch { return }
-  await deleteAdminUser(row.id)
+  await deleteAdminUser(String(row.id))
   ElMessage.success('已删除')
   await load()
 }

@@ -47,6 +47,22 @@ export const useUserStore = defineStore('admin-user', () => {
     persist()
   }
 
+  /**
+   * 用户端跳转时在 URL hash 携带会话写入本站（开发联调用）。
+   * payload：{ token, user }
+   */
+  function acceptHandoff(payload) {
+    if (!payload?.token || !payload?.user) {
+      throw new Error('无效的登录同步数据')
+    }
+    if (payload.user.role !== 'ADMIN') {
+      throw new Error('仅管理员可同步进入后台')
+    }
+    token.value = payload.token
+    user.value = payload.user
+    persist()
+  }
+
   async function refreshMe() {
     if (!token.value) return null
     const me = await authApi.me()
@@ -55,5 +71,5 @@ export const useUserStore = defineStore('admin-user', () => {
     return me
   }
 
-  return { token, user, isLoggedIn, login, logout, clearSession, refreshMe }
+  return { token, user, isLoggedIn, login, logout, clearSession, acceptHandoff, refreshMe }
 })

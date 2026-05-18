@@ -134,12 +134,12 @@ async function reload(p) {
 async function onOff(row) {
   try { await ElMessageBox.confirm(`确定下架「${row.name}」吗？`, '下架', { type: 'warning' }) }
   catch { return }
-  await offShelfProduct(row.id)
+  await offShelfProduct(String(row.id))
   ElMessage.success('已下架')
   reload()
 }
 async function onOn(row) {
-  await onShelfProduct(row.id)
+  await onShelfProduct(String(row.id))
   ElMessage.success('已重新上架')
   reload()
 }

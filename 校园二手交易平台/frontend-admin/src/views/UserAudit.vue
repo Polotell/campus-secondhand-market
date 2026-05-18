@@ -164,7 +164,7 @@ async function onApprove(row) {
       '审核通过', { type: 'success' }
     )
   } catch { return }
-  await approveUser(row.id)
+  await approveUser(String(row.id))
   ElMessage.success('审核通过成功')
   reload()
 }
@@ -181,7 +181,7 @@ async function onReject(row) {
     })
     reason = ret.value
   } catch { return }
-  await rejectUser(row.id, reason)
+  await rejectUser(String(row.id), reason)
   ElMessage.success('已驳回')
   reload()
 }

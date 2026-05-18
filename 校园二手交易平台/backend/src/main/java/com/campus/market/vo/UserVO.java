@@ -3,6 +3,8 @@ package com.campus.market.vo;
 import com.campus.market.common.enums.UserRole;
 import com.campus.market.common.enums.UserStatus;
 import com.campus.market.entity.User;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -15,6 +17,8 @@ import java.time.LocalDateTime;
 @Data
 public class UserVO {
 
+    /** JSON 输出为字符串，避免前端 Number 精度丢失（雪花 ID）→ 审核/删除等路径参数错乱报「用户不存在」 */
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
     private String username;
     private String realName;

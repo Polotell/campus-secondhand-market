@@ -255,7 +255,7 @@ async function loadOrders(p) {
 
 async function showDetail(id) {
   detailVisible.value = true
-  detail.value = await getOrderDetail(id)
+  detail.value = await getOrderDetail(String(id))
 }
 
 async function onCancel(row) {
@@ -264,13 +264,13 @@ async function onCancel(row) {
   } catch {
     return
   }
-  await cancelOrder(row.id)
+  await cancelOrder(String(row.id))
   ElMessage.success('已取消')
   await loadOrders()
 }
 
 async function onConfirmReceive(row) {
-  await confirmReceiveOrder(row.id)
+  await confirmReceiveOrder(String(row.id))
   ElMessage.success('已确认收货，24 小时内可申请退货')
   await loadOrders()
 }
@@ -286,7 +286,7 @@ const returnRules = {
   ]
 }
 function onApplyReturn(row) {
-  returnForm.orderId = row.id
+  returnForm.orderId = String(row.id)
   returnForm.orderNo = row.orderNo
   returnForm.reason = ''
   returnDialogVisible.value = true
@@ -314,7 +314,7 @@ const reviewProdLoading = ref(false)
 const reviewMerLoading = ref(false)
 
 async function openReview(row) {
-  const d = await getOrderDetail(row.id)
+  const d = await getOrderDetail(String(row.id))
   reviewOrder.value = d
   reviewLines.value = (d.items || []).filter((it) => !it.reviewed).map((it) => ({
     orderItemId: it.id,
@@ -331,9 +331,9 @@ async function submitProductPart() {
   if (!reviewLines.value.length) return
   reviewProdLoading.value = true
   try {
-    await submitProductReviews(reviewOrder.value.id, {
+    await submitProductReviews(String(reviewOrder.value.id), {
       items: reviewLines.value.map(({ orderItemId, rating, content }) => ({
-        orderItemId,
+        orderItemId: String(orderItemId),
         rating,
         content: content || '好评'
       }))
@@ -358,7 +358,7 @@ async function submitProductPart() {
 async function submitMerchantPart() {
   reviewMerLoading.value = true
   try {
-    await submitMerchantServiceReview(reviewOrder.value.id, {
+    await submitMerchantServiceReview(String(reviewOrder.value.id), {
       rating: merchantSvcRating.value,
       content: merchantSvcContent.value || '服务满意'
     })
@@ -372,8 +372,10 @@ async function submitMerchantPart() {
 
 onMounted(async () => {
   await loadOrders(1)
-  const highlight = Number(route.query.highlight || 0)
-  if (highlight) showDetail(highlight).catch(() => {})
+  const h = route.query.highlight
+  if (h != null && String(h).trim() !== '') {
+    showDetail(String(h)).catch(() => {})
+  }
 })
 </script>
 

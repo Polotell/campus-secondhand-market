@@ -1,0 +1,147 @@
+@startuml campus-market-order-domain-classes
+!theme plain
+title 订单核心域类图（节选）\n与 com.campus.market 下实体 / DTO / 接口一致，供实验报告插图
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype ortho
+left to right direction
+
+package "com.campus.market.controller" {
+  class OrderController << Spring REST >> {
+    +preview(body): Result
+    +create(dto): Result
+    +confirmReceive(orderId): Result
+    .. 其余买家订单/退货/评价入口见源码 ..
+    --
+    -orderService: OrderService
+    -returnService: ReturnService
+    -reviewService: ReviewService
+  }
+}
+
+package "com.campus.market.service" {
+  interface OrderService {
+    +preview(buyerId, cartItemIds): Preview
+    +create(buyerId, dto): Long
+    +confirmReceive(buyerId, orderId): void
+    +shipByMerchant(merchantId, orderId): void
+    +autoConfirmReceiveJob(): int
+    +autoCompleteJob(): int
+    .. list/detail/cancel ..
+  }
+
+  interface PlatformFinanceService {
+    +escrowIn(order): void
+    +escrowOutToBuyerCancel(order): void
+    +escrowOutToBuyerReturn(order): void
+    +settleOrderCompleted(order): void
+  }
+
+  interface ReturnService << facade >>
+  interface ReviewService << facade >>
+}
+
+package "com.campus.market.dto" {
+  class CheckoutDTO {
+    +cartItemIds: List~Long~
+    +pointsUsed: Integer
+    +remark: String
+    +meetPlace: String
+    +meetTime: String
+  }
+}
+
+package "com.campus.market.entity" << persist >> #EEFFEE {
+  class User << table user >> {
+    +id: Long
+    +username: String
+    +role: UserRole
+    +status: UserStatus
+    +balance: BigDecimal
+    +points: Integer
+    +merchantLevel: Integer
+    .. 营业执照/头像等 ..
+  }
+
+  class Product << table product >> {
+    +id: Long
+    +merchantId: Long
+    +categoryId: Long
+    +name: String
+    +stock: Integer
+    +discountPrice: BigDecimal
+    +status: ProductStatus
+  }
+
+  class CartItem << table cart_item >> {
+    +id: Long
+    +userId: Long
+    +productId: Long
+    +quantity: Integer
+    +selected: Integer
+  }
+
+  class Order << table order >> {
+    +id: Long
+    +orderNo: String
+    +buyerId: Long
+    +merchantId: Long
+    +totalAmount: BigDecimal
+    +actualAmount: BigDecimal
+    +platformFeeRate: BigDecimal
+    +platformFee: BigDecimal
+    +merchantIncome: BigDecimal
+    +status: OrderStatus
+    +autoConfirmAt: LocalDateTime
+    +returnDeadline: LocalDateTime
+  }
+
+  class OrderItem << table order_item >> {
+    +id: Long
+    +orderId: Long
+    +productId: Long
+    +productName: String
+    +unitPrice: BigDecimal
+    +quantity: Integer
+    +subtotal: BigDecimal
+  }
+
+  class ReturnRecord << table return_record >> {
+    +id: Long
+    +orderId: Long
+    +auditStatus: ReturnAuditStatus
+  }
+}
+
+' ---------- HTTP → Service ----------
+OrderController *--> OrderService
+OrderController *--> ReturnService
+OrderController *--> ReviewService
+
+' ---------- Service → DTO / Entity ----------
+OrderService ..> CheckoutDTO : create
+OrderService ..> Order
+OrderService ..> PlatformFinanceService
+ReturnService ..> ReturnRecord
+PlatformFinanceService ..> Order
+
+' ---------- 实体关联（按 FK 语义） ----------
+User "1" ||--o{ CartItem : user_id
+Product "1" ||--o{ CartItem : product_id
+
+User "1" ||--o{ Order : buyer_id
+User "1" ||--o{ Order : merchant_id
+
+Product "1" ||--o{ OrderItem : product_id\n快照同源
+
+Order "1" *--o{ OrderItem : order_id
+
+Order "1" ||--o| ReturnRecord : order_id
+
+note bottom of Order
+  货款托管与费率快照参见 PlatformFinanceService
+  与 backend/doc/flow.md 时序一致
+end note
+
+@enduml

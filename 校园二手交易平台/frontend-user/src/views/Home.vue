@@ -51,9 +51,9 @@
         <div class="list-toolbar">
           <el-radio-group v-model="query.sort" @change="reload(1)" size="default">
             <el-radio-button value="latest">最新发布</el-radio-button>
-            <el-radio-button value="sales_desc">销量</el-radio-button>
-            <el-radio-button value="price_asc">价格 ↑</el-radio-button>
-            <el-radio-button value="price_desc">价格 ↓</el-radio-button>
+            <el-radio-button value="sales_desc">销量优先</el-radio-button>
+            <el-radio-button value="price_asc">价格从低到高</el-radio-button>
+            <el-radio-button value="price_desc">价格从高到低</el-radio-button>
             <el-radio-button value="rating_desc">好评优先</el-radio-button>
           </el-radio-group>
           <span class="count">共 <b>{{ total }}</b> 件</span>

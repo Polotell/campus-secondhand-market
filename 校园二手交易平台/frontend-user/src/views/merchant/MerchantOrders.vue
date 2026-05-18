@@ -270,7 +270,7 @@ async function loadOrders(p) {
 
 async function showDetail(id) {
   detailVisible.value = true
-  detail.value = await getMerchantOrderDetail(id)
+  detail.value = await getMerchantOrderDetail(String(id))
 }
 
 async function onBlacklistBuyer(row) {
@@ -290,7 +290,7 @@ async function onBlacklistBuyer(row) {
       }
     )
     await addMerchantBlacklist({
-      userId: row.buyerId,
+      userId: String(row.buyerId),
       reason: (value || '').trim() || undefined
     })
     ElMessage.success('已拉黑该买家')
@@ -309,7 +309,7 @@ async function onShip(row) {
   } catch {
     return
   }
-  await shipOrder(row.id)
+  await shipOrder(String(row.id))
   ElMessage.success('已发货')
   detailVisible.value = false
   await loadOrders()
@@ -325,7 +325,7 @@ async function onApprove(row) {
   } catch {
     return
   }
-  await approveReturn(row.id)
+  await approveReturn(String(row.id))
   ElMessage.success('已同意退货，款项与库存已归还')
   detailVisible.value = false
   await loadOrders()
@@ -342,14 +342,14 @@ const rejectRules = {
   ]
 }
 async function onReject(row) {
-  rejectForm.orderId = row.id
+  rejectForm.orderId = String(row.id)
   rejectForm.orderNo = row.orderNo
   rejectForm.remark = ''
   // 列表页 VO 不带 returnRecord，行级触发时先拿详情把买家原因展示出来
   let reason = row.returnRecord?.reason
   if (!reason) {
     try {
-      const d = await getMerchantOrderDetail(row.id)
+      const d = await getMerchantOrderDetail(String(row.id))
       reason = d?.returnRecord?.reason || '-'
     } catch { reason = '-' }
   }
@@ -360,7 +360,7 @@ async function submitReject() {
   await rejectFormRef.value?.validate()
   rejectSubmitting.value = true
   try {
-    await rejectReturn(rejectForm.orderId, { remark: rejectForm.remark })
+    await rejectReturn(String(rejectForm.orderId), { remark: rejectForm.remark })
     ElMessage.success('已拒绝退货，订单进入已完成')
     rejectDialogVisible.value = false
     detailVisible.value = false
@@ -377,7 +377,7 @@ const buyerRevContent = ref('')
 const buyerRevLoading = ref(false)
 
 function openBuyerReview(row) {
-  buyerRevOrder.value = { id: row.id, orderNo: row.orderNo, buyerName: row.buyerName }
+  buyerRevOrder.value = { id: String(row.id), orderNo: row.orderNo, buyerName: row.buyerName }
   buyerRevRating.value = 5
   buyerRevContent.value = ''
   buyerRevVisible.value = true
@@ -387,7 +387,7 @@ async function submitBuyerRev() {
   if (!buyerRevOrder.value) return
   buyerRevLoading.value = true
   try {
-    await submitBuyerReview(buyerRevOrder.value.id, {
+    await submitBuyerReview(String(buyerRevOrder.value.id), {
       rating: buyerRevRating.value,
       content: buyerRevContent.value || '交易顺利'
     })

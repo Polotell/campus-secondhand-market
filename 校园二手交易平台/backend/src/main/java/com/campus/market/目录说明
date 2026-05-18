@@ -1,0 +1,29 @@
+包名	功能定位
+controller
+接 HTTP：@RestController，定义 URL、收请求、调 service、返回统一 Result。对外 API 的入口。
+service
+业务接口：XxxService 描述「能做什么事」。
+service.impl
+业务实现：XxxServiceImpl 写具体规则、事务、编排多个 mapper。
+mapper
+数据访问：MyBatis Mapper，和数据库表打交道（CRUD）。
+entity
+持久化实体：与表结构对应的 Java 类（字段对应列）。
+dto
+入参对象：前端 POST/PUT 的请求体、@Valid 校验多写在这里（如注册 UserRegisterDTO）。
+vo
+出参对象：返回给前端的「视图」结构，常和 entity 字段不完全一致（隐藏敏感字段、拼展示字段）。
+common
+公共基础：统一响应 Result、错误码 ResultCode、分页 PageResult、常量、枚举、当前用户上下文 UserContext 等。
+config
+Spring 配置：拦截器注册、静态资源映射、其它 @Configuration。
+interceptor
+拦截器：如登录拦截，在进 Controller 前解析 Token、放用户上下文。
+annotation
+自定义注解：如 @RequiresRole，标在需要登录/权限的接口上。
+aspect
+AOP 切面：配合注解做鉴权、操作日志等横切逻辑（如 AuthAspect、LogAspect）。
+exception
+异常体系：业务异常 BusinessException、全局异常处理 GlobalExceptionHandler。
+utils
+工具类：验证码、JWT、订单号等可复用实现，见上文。

@@ -215,14 +215,14 @@ async function reload(p) {
 async function viewDetail(row) {
   drawerVisible.value = true
   detail.value = null
-  detail.value = await getProductDetail(row.id)
+  detail.value = await getProductDetail(String(row.id))
 }
 
 async function onApprove(row) {
   try {
     await ElMessageBox.confirm(`确定审核通过「${row.name}」吗？`, '审核通过', { type: 'success' })
   } catch { return }
-  await approveProduct(row.id)
+  await approveProduct(String(row.id))
   ElMessage.success('审核通过')
   reload()
 }
@@ -239,7 +239,7 @@ async function onReject(row) {
     })
     reason = ret.value
   } catch { return }
-  await rejectProduct(row.id, reason)
+  await rejectProduct(String(row.id), reason)
   ElMessage.success('已驳回')
   reload()
 }

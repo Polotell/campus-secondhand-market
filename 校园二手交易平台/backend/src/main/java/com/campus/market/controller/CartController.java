@@ -26,9 +26,9 @@ public class CartController {
     private final CartService cartService;
 
     @PostMapping
-    public Result<Map<String, Long>> add(@Valid @RequestBody CartAddDTO dto) {
+    public Result<Map<String, String>> add(@Valid @RequestBody CartAddDTO dto) {
         Long id = cartService.add(UserContext.getUserId(), dto.getProductId(), dto.getQuantity());
-        return Result.success(Map.of("id", id));
+        return Result.success(Map.of("id", String.valueOf(id)));
     }
 
     @GetMapping

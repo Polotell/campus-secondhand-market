@@ -28,7 +28,7 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { User, Lock } from '@element-plus/icons-vue'
@@ -45,6 +45,24 @@ const rules = {
   username: [{ required: true, message: '请输入账号', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
 }
+
+/** 用户端 5173 登录管理员后跳转：/#handoff=encodeURIComponent(JSON.stringify({token,user})) */
+const HANDOFF_PREFIX = '#handoff='
+
+onMounted(() => {
+  const rawHash = window.location.hash || ''
+  if (!rawHash.startsWith(HANDOFF_PREFIX)) return
+  try {
+    const json = decodeURIComponent(rawHash.slice(HANDOFF_PREFIX.length))
+    store.acceptHandoff(JSON.parse(json))
+    window.history.replaceState(null, '', window.location.pathname + window.location.search)
+    ElMessage.success('已从用户端同步登录')
+    router.replace(route.query.redirect || '/dashboard')
+  } catch (e) {
+    ElMessage.error(e.message || '同步登录失败，请手动登录')
+    window.history.replaceState(null, '', window.location.pathname + window.location.search)
+  }
+})
 
 async function onSubmit() {
   const ok = await formRef.value.validate().catch(() => false)
